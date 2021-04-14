@@ -15,7 +15,7 @@ The computation is done with the following general formula :
 ![n_cr definition](./img/definition_critical_density.png)
 
 where
-* the A coefficients are the Einstein de-excitation rates. Those values are stored in the files of the `./data/Lines/` folder. For these coefficients, there is only one file per species.
+* the A coefficients are the Einstein coefficients (radiative de-excitation rates). Those values are stored in the files of the `./data/Lines/` folder. For these coefficients, there is only one file per species.
 
 * The k coefficients are collisional de-excitation rates. These values are stored in the files of the `./data/Collisions/` folder. For these coefficients, there is one file per pair (species, collider). 
 
@@ -44,4 +44,4 @@ Note : If you don't use conda, make sure you have glob, pandas, numpy, matplotli
 
 # Usage
 
-To use, in the 2nd cell, enter the name different names the chemical species you want have (ex : for CO, it is called co in `Lines` and 12c16o in `Collisions`, while C+ is called cp in both folders). Then run the whole notebook.
+To use, in the 2nd cell, enter the name different names the chemical species you want have. For instance, CO  is called 'co' in `Lines` and '12c16o' in `Collisions`, while C+ is called 'cp' in both folders. Then run the whole notebook.

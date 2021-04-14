@@ -7,6 +7,7 @@ import glob
 import re
 import os
 
+
 def read_lines(species):
     """reads the file that contains the Einstein coefficients
     of the radiative de-excitation
@@ -105,6 +106,21 @@ def compute_sum_einstein_coefs(df_lines, nu):
 
 
 def read_collisions(species):
+    """reads the files that contains the collisional 
+    de-excitation rates
+
+    Parameters
+    ----------
+    species : list or str
+        name or list of names of the one species to consider
+        (if list of names : only one of them can correspond to a file
+        in ./data/Lines) 
+
+    Returns
+    -------
+    df_collisions : pandas.DataFrame
+        the collisional de-excitation rates per collider per temperature
+    """
     if isinstance(species, str):
         species = [species]
     assert isinstance(species, list)
@@ -138,34 +154,59 @@ def read_collisions(species):
             header=None, nrows=nrows,
             skip_blank_lines=True
         )
+        # adjust the header
         if len(header) + 1 == len(df_collisions.columns):
             df_collisions = df_collisions.drop([0], 1)
 
         df_collisions.columns = header
 
+        # add a column with the name of the collider 
         df_collisions['collider'] = filename.split("_")[1]
         df_collisions = df_collisions.set_index(["nu", "nl", "collider"])
 
         list_collisions.append(df_collisions)
 
+    # group the results in one dataframe
     df_collisions = pd.concat(list_collisions)
     df_collisions = df_collisions.reindex(sorted(df_collisions.columns), axis=1)
-    return df_collisions
-
-
-def process_collisions(df_collisions):
 
     # linear interpolation collision coefficients
     # (only works if there are known values for lower AND higher temperatures for that collider)
     # (otherwise the whole column is dropped)
     df_collisions = df_collisions.interpolate(axis=1)
+
+    # drops the temperatures for which at least one collider is missing
     df_collisions = df_collisions.dropna(axis=1)
 
     return df_collisions
 
 
 
+
 def compute_critical_density(kind, nu, sum_einstein_coefs, df_collisions, df_fc):
+    """computes the critical density
+
+    Parameters
+    ----------
+    kind : str
+        name of the column of df_fc to consider, ie medium to consider
+    nu : int
+        index of the upper level
+    sum_einstein_coefs : float
+        sum of the Einstein coefficients of all the transitions from the nu 
+        level to lower levels 
+    df_collisions : pandas.DataFrame
+        the collisional de-excitation rates per collider per temperature
+    df_fc : pandas.DataFrame
+        dataframe with the abundances of the colliders.
+
+    Returns
+    -------
+    df_ncr : pandas.Series
+        index : temperature, values : critical density
+    """
+    assert kind in list(df_fc.columns)
+
     # process collisions (for each collisioner, sum over nl<nu)
     # according to the chosen kind of medium
     df_collisions_per_collisioner = df_collisions.loc[nu]
@@ -189,16 +230,31 @@ def compute_critical_density(kind, nu, sum_einstein_coefs, df_collisions, df_fc)
     # create divide the numerator by the denominator
     df_ncr = sum_einstein_coefs / df_collisions_global 
     df_ncr = df_ncr.apply(lambda x: np.nan if np.isinf(x) else x)
-    # for col in df_ncr.columns: 
-    #     df_ncr[col] = sum_einstein_coefs / df_collisions_global[col]
-        # df_ncr[col] = df_ncr[col].apply(lambda x: np.nan if np.isinf(x) else x)
-
 
     return df_ncr
 
 
 
 def plot_critical_density(species, nu, kinds, df_fc, df_collisions, df_lines):
+    """plots the critical densities of level nu for the considered species
+    in the specified environment(s) in function of the temperature 
+
+    Parameters
+    ----------
+    species : str or list of str
+        name(s) of the one considered species in the Collision and 
+        Lines folders
+    nu : int
+        index of the upper level
+    kinds : list of str
+        list of environments in which the 
+    df_fc : pandas.DataFrame
+        dataframe with the abundances of the colliders.
+    df_collisions : pandas.DataFrame
+        the collisional de-excitation rates per collider per temperature
+    df_lines : pandas.DataFrame
+        dataframe with the Einstein coefficients of the considered species
+    """
     fig, ax = plt.subplots(figsize=(8,6))
 
     # compute the critical density for a set of temperatures and plot them
