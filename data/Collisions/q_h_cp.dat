@@ -1,0 +1,14 @@
+!NUMBER OF ENERGY LEVELS
+2
+!NUMBER OF COLLISIONAL TRANSITIONS
+1
+!COLLISION TEMPERATURES
+10
+!COLLISION TEMPERATURES
+                  10.0          50.0          100.0         200.0         500.0         700.0         1000.0        2000.0        3000.0        5000.0
+!NUM    UP   LOW  DOWN_COLL_RATES [cm^3 s^-1]
+   1    2    1    8.8600E-10    8.8600E-10    8.8600E-10    8.8600E-10    8.8600E-10    8.8600E-10    8.8600E-10    8.8600E-10    8.8600E-10    8.8600E-10
+# REFERENCE ------------------------------------------------------------------------------------------------------------------------
+# De-excitation rate of C+ with H-
+# Reference    :  Meudon PDR code (versions before 2021)
+# Note         :  Values 1E-90 means unknown rate
